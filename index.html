@@ -250,6 +250,7 @@ map.on('load',()=>{
   }
 });
 locButton.onclick=locate;
+ map.on('load',()=>locate());
 mapTypeButton.onclick=()=>{
   satelliteMode=!satelliteMode;
   if(map.isStyleLoaded() && map.getLayer('satellite-imagery')) {
