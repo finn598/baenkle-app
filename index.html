@@ -715,26 +715,74 @@ function firstBenchScale(zoom){
 }
 function askBenchRating(bankId, onSuccess){
  const old=document.getElementById('baenkleRatingDialog');if(old)old.remove();
- const layer=document.createElement('div');layer.id='baenkleRatingDialog';
- layer.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;justify-content:center;padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom));font-family:Arial,sans-serif;';
+ const layer=document.createElement('div');
+ layer.id='baenkleRatingDialog';
+ layer.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(8,22,13,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:flex-end;justify-content:center;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));font-family:Arial,sans-serif;';
  const card=document.createElement('section');
- card.style.cssText='width:100%;max-width:460px;background:#fff;color:#203528;border-radius:24px;padding:22px 18px 18px;text-align:center;box-shadow:0 12px 40px #0006;';
- card.innerHTML='<div style="font-size:24px;margin-bottom:8px">⭐</div><h2 style="font-size:20px;margin:0 0 7px">Wie war dein Besuch?</h2><p style="margin:0 0 17px;color:#68756b;font-size:14px">Bewerte '+bankId+' mit 1 bis 5 Sternen.</p><div data-stars style="display:flex;justify-content:center;gap:7px;margin:0 0 14px"></div><div data-rating-status style="min-height:20px;color:#607064;font-size:12px;margin-bottom:12px">Tippe auf deine Bewertung.</div><button type="button" data-cancel style="border:0;background:#edf2ed;color:#405347;border-radius:12px;padding:11px 20px;font-weight:700">Abbrechen</button>';
+ card.style.cssText='position:relative;overflow:hidden;width:100%;max-width:480px;color:#173522;border:1px solid rgba(255,255,255,.78);border-radius:30px;padding:13px 20px 20px;text-align:center;background:linear-gradient(160deg,#ffffff 0%,#f2f8f1 58%,#e5f1e4 100%);box-shadow:0 24px 80px rgba(0,0,0,.35);';
+ card.innerHTML=`
+  <div style="width:44px;height:5px;border-radius:10px;background:#cbd9cc;margin:0 auto 18px"></div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px">
+   <span style="display:grid;place-items:center;width:42px;height:42px;border-radius:15px;background:linear-gradient(145deg,#e2f4e4,#bfe2c4);font-size:23px;box-shadow:inset 0 1px 0 #fff">🌿</span>
+   <span style="font-size:11px;font-weight:900;letter-spacing:1.7px;color:#62816a">BÄNKLE-BEWERTUNG</span>
+  </div>
+  <div style="font-size:25px;font-weight:900;letter-spacing:-.6px;margin-bottom:5px">Wie war dein Besuch?</div>
+  <div style="display:inline-flex;align-items:center;gap:7px;margin:7px auto 17px;padding:7px 13px;border:1px solid #cfe2d0;border-radius:30px;background:#ffffffb8;color:#315b3c;font-size:13px;font-weight:900">🌳 ${bankId}</div>
+  <div style="padding:17px 12px 13px;border:1px solid #dceadd;border-radius:22px;background:rgba(255,255,255,.78);box-shadow:0 8px 24px rgba(47,91,55,.07)">
+   <div style="font-size:12px;font-weight:800;color:#718276;letter-spacing:.5px;margin-bottom:12px">DEINE STERNE</div>
+   <div data-stars style="display:flex;justify-content:center;gap:clamp(3px,2vw,10px);margin:0 0 10px"></div>
+   <div data-rating-label style="min-height:24px;font-size:15px;font-weight:900;color:#315b3c">Tippe auf deine Bewertung</div>
+   <div style="display:flex;justify-content:center;gap:5px;margin-top:13px"><span data-dot style="width:23px;height:4px;border-radius:8px;background:#d9e4d9"></span><span data-dot style="width:23px;height:4px;border-radius:8px;background:#d9e4d9"></span><span data-dot style="width:23px;height:4px;border-radius:8px;background:#d9e4d9"></span><span data-dot style="width:23px;height:4px;border-radius:8px;background:#d9e4d9"></span><span data-dot style="width:23px;height:4px;border-radius:8px;background:#d9e4d9"></span></div>
+  </div>
+  <div data-rating-status style="min-height:20px;margin:13px 0 10px;color:#718076;font-size:12px">Deine Bewertung wird per E-Mail übermittelt.</div>
+  <button type="button" data-send disabled style="width:100%;border:0;border-radius:17px;padding:16px 18px;background:linear-gradient(135deg,#b8c9b9,#8da891);color:#fff;font-size:16px;font-weight:900;letter-spacing:.2px;box-shadow:0 8px 18px rgba(35,83,45,.12);opacity:.55">⭐ Bewertung senden</button>
+  <button type="button" data-cancel style="margin-top:9px;border:0;background:transparent;color:#6c7d70;border-radius:12px;padding:11px 20px;font-weight:800;font-size:13px">Abbrechen</button>
+ `;
  const stars=card.querySelector('[data-stars]');
- for(let n=1;n<=5;n++){const b=document.createElement('button');b.type='button';b.textContent='★';b.setAttribute('aria-label',n+' von 5 Sternen');b.style.cssText='border:0;background:transparent;color:#c8d0c8;font-size:39px;padding:2px;cursor:pointer;';b.addEventListener('click',async()=>{
-   const status=card.querySelector('[data-rating-status]');
-   stars.querySelectorAll('button').forEach((x,i)=>{x.disabled=true;x.style.color=i<n?'#e5ad24':'#c8d0c8';});
-   card.querySelector('[data-cancel]').disabled=true;status.textContent='Bewertung wird gesendet …';
-   try{
-    if(!window.emailjs)throw new Error('EmailJS konnte nicht geladen werden.');
-    await window.emailjs.send('service_su938b9','template_8zm7b6n',{bank:bankId,rating:String(n)},{publicKey:'nnIC9NK88IriqA3bg'});
-    layer.remove();onSuccess(n);
-   }catch(err){
-    status.textContent='Senden fehlgeschlagen. Bitte prüfe die Internetverbindung und versuche es erneut.';
-    stars.querySelectorAll('button').forEach(x=>{x.disabled=false;});card.querySelector('[data-cancel]').disabled=false;
-    if(typeof showAppToast==='function')showAppToast('Bewertung konnte nicht gesendet werden.');
-   }
-  });stars.appendChild(b);}
+ const send=card.querySelector('[data-send]');
+ const label=card.querySelector('[data-rating-label]');
+ const status=card.querySelector('[data-rating-status]');
+ const dots=card.querySelectorAll('[data-dot]');
+ const labels=['Nicht gut','Ganz okay','Gut','Sehr gut','Einfach wunderschön!'];
+ let selected=0;
+ function paint(n){
+  stars.querySelectorAll('button').forEach((b,i)=>{
+   b.style.color=i<n?'#e7ad25':'#d4ddd4';
+   b.style.transform=i<n?'translateY(-2px) scale(1.08)':'scale(1)';
+   b.style.filter=i<n?'drop-shadow(0 3px 4px rgba(190,137,20,.22))':'none';
+  });
+  dots.forEach((d,i)=>d.style.background=i<n?'#e7ad25':'#d9e4d9');
+  label.textContent=n?labels[n-1]:'Tippe auf deine Bewertung';
+  send.disabled=!n;
+  send.style.opacity=n?'1':'.55';
+  send.style.background=n?'linear-gradient(135deg,#2f7d43,#174c2a)':'linear-gradient(135deg,#b8c9b9,#8da891)';
+ }
+ for(let n=1;n<=5;n++){
+  const b=document.createElement('button');b.type='button';b.textContent='★';
+  b.setAttribute('aria-label',n+' von 5 Sternen');
+  b.style.cssText='border:0;background:transparent;color:#d4ddd4;font-size:clamp(38px,10vw,48px);line-height:1;padding:2px;cursor:pointer;transition:transform .16s,color .16s;touch-action:manipulation;';
+  b.addEventListener('click',()=>{selected=n;paint(selected);});
+  stars.appendChild(b);
+ }
+ send.addEventListener('click',async()=>{
+  if(!selected||send.disabled)return;
+  stars.querySelectorAll('button').forEach(x=>x.disabled=true);
+  send.disabled=true;send.textContent='⏳ Wird gesendet …';
+  card.querySelector('[data-cancel]').disabled=true;
+  status.textContent='Deine '+selected+'-Sterne-Bewertung wird sicher übermittelt …';
+  try{
+   if(!window.emailjs)throw new Error('EmailJS konnte nicht geladen werden.');
+   await window.emailjs.send('service_su938b9','template_8zm7b6n',{bank:bankId,rating:String(selected)},{publicKey:'nnIC9NK88IriqA3bg'});
+   send.textContent='✓ Erfolgreich gesendet';
+   status.textContent='Danke! Deine Bewertung ist angekommen.';
+   setTimeout(()=>{layer.remove();onSuccess(selected);},450);
+  }catch(err){
+   status.textContent='Senden fehlgeschlagen. Bitte prüfe die Internetverbindung und versuche es erneut.';
+   stars.querySelectorAll('button').forEach(x=>x.disabled=false);
+   card.querySelector('[data-cancel]').disabled=false;
+   send.disabled=false;send.textContent='↻ Erneut senden';
+  }
+ });
  card.querySelector('[data-cancel]').addEventListener('click',()=>layer.remove());
  layer.addEventListener('click',e=>{if(e.target===layer)layer.remove();});
  layer.appendChild(card);document.body.appendChild(layer);
@@ -923,7 +971,9 @@ function openSecondBenchDetails(){
 }
 // B00003: gleicher Detailaufbau wie B00001 und B00002.
 const thirdBenchCoords=[7 + 54.679/60,48 + 22.926/60];
+const fourthBenchCoords=[7 + 49.508/60,48 + 17.464/60];
 let thirdBenchMarker=null;
+let fourthBenchMarker=null;
 function openThirdBenchDetails(){
  const old=document.getElementById('fixedFirstBenchPopup');
  if(old) old.remove();
@@ -1009,6 +1059,96 @@ function openThirdBenchDetails(){
   syncFavorite();
   favBtn.addEventListener('click',()=>{const ids=readIds(favoriteKey);const active=ids.includes('B00003');const next=active?ids.filter(id=>id!=='B00003'):[...ids,'B00003'];if(!writeIds(favoriteKey,next)){showAppToast('Favorit konnte nicht gespeichert werden.');return;}syncFavorite();showAppToast(active?'B00003 aus Favoriten entfernt.':'⭐ B00003 zu deinen Favoriten hinzugefügt!');});
   popup.querySelector('[data-navigate]').addEventListener('click',()=>{const url='https://www.google.com/maps/dir/?api=1&destination=48.3821000%2C7.9113167&travelmode=walking';window.open(url,'_blank','noopener');});
+ }
+ showSmall();
+ document.body.appendChild(popup);
+}
+
+function openFourthBenchDetails(){
+ const old=document.getElementById('fixedFirstBenchPopup');
+ if(old) old.remove();
+ const popup=document.createElement('section');
+ popup.id='fixedFirstBenchPopup';
+ popup.setAttribute('role','dialog');
+ popup.setAttribute('aria-label','B00004');
+ popup.style.cssText='position:fixed;z-index:2147483000;left:12px;right:12px;bottom:calc(82px + env(safe-area-inset-bottom));max-height:72vh;overflow:auto;background:#fff;color:#263238;border:1px solid #dce8dc;border-radius:18px;box-shadow:0 10px 32px #0005;font:14px Arial,sans-serif;';
+ const visitKey='baenkle.visitedBenchIds';
+ const favoriteKey='baenkle.favoriteBenchIds';
+ function readIds(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+ function writeIds(key,ids){try{localStorage.setItem(key,JSON.stringify([...new Set(ids)]));return true}catch(e){return false}}
+ function updateVisitCount(){const el=document.getElementById('visitedBenchCount');if(el)el.textContent=String(Math.max(0,parseInt(localStorage.getItem('baenkle.visitedBenchCount')||'0',10)||0));window.dispatchEvent(new Event('baenkle-count-updated'));}
+ function showSmall(){
+  popup.style.cssText='position:fixed;z-index:2147483000;left:12px;right:12px;bottom:calc(82px + env(safe-area-inset-bottom));max-height:45vh;overflow:auto;background:#fff;color:#263238;border:1px solid #dce8dc;border-radius:18px;box-shadow:0 10px 32px #0005;font:14px Arial,sans-serif;';
+  popup.innerHTML=`<div style="padding:10px 14px 0"><div style="width:42px;height:5px;border-radius:9px;background:#d8e2d8;margin:0 auto 10px"></div></div>
+   <button type="button" data-open-large aria-label="Großes Bänkle-Menü öffnen" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:16px;border:0;background:#f1f7f1;color:#203528;cursor:pointer;min-height:62px">
+    <strong style="display:block;flex:1;font-size:19px">B00004</strong><span style="font-size:25px;color:#6b786e">›</span>
+   </button>
+   <button type="button" data-close aria-label="Schließen" style="position:absolute;right:9px;top:8px;border:0;background:#e7eee8;border-radius:50%;width:29px;height:29px;font-size:20px;color:#405347">×</button>`;
+  popup.querySelector('[data-open-large]').addEventListener('click',showLarge);
+  popup.querySelector('[data-close]').addEventListener('click',()=>popup.remove());
+ }
+ function showLarge(){
+  popup.style.cssText='position:fixed;inset:0;z-index:2147483000;overflow-y:auto;background:#101a15;color:#f4f7f3;border:0;border-radius:0;box-shadow:none;font:15px/1.5 system-ui,-apple-system,BlinkMacSystemFont,sans-serif;overscroll-behavior:contain;';
+  popup.innerHTML=`<style>
+   #fixedFirstBenchPopup .b-detail-top{position:sticky;top:0;z-index:5;padding:calc(env(safe-area-inset-top) + 10px) 18px 17px;background:rgba(17,31,23,.82);border-bottom:1px solid rgba(170,207,177,.2);backdrop-filter:blur(26px) saturate(1.35);-webkit-backdrop-filter:blur(26px) saturate(1.35)}
+   #fixedFirstBenchPopup .b-detail-icon{width:46px;height:46px;border:1px solid #5b8964;border-radius:16px;background:linear-gradient(145deg,#365f40,#172d20);display:grid;place-items:center;font-size:23px;box-shadow:0 7px 22px #0005,inset 0 1px #ffffff35;flex:none}
+   #fixedFirstBenchPopup .b-detail-back{width:42px;height:42px;border:1px solid #405b47;border-radius:14px;background:#20382a;color:#f5fff6;font-size:28px;line-height:1}
+   #fixedFirstBenchPopup .b-detail-hero{margin:18px 16px 16px;padding:25px 21px 22px;border:1px solid #5b8964;border-radius:28px;background:radial-gradient(ellipse at 92% 4%,#91d99b55,transparent 37%),radial-gradient(ellipse at 0% 100%,#386c4655,transparent 48%),linear-gradient(145deg,#294b34,#14251b 78%);box-shadow:0 20px 42px #0006,inset 0 1px #ffffff28;position:relative;overflow:hidden;isolation:isolate;animation:bHeroIn .55s cubic-bezier(.2,.8,.2,1) both}
+   #fixedFirstBenchPopup .b-detail-hero:after{content:'🌲';position:absolute;right:12px;bottom:-19px;font-size:112px;opacity:.16;filter:grayscale(.15);z-index:-1;transform:rotate(-8deg)}
+   @keyframes bHeroIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+   @keyframes bCardIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+   #fixedFirstBenchPopup .b-eyebrow{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:#b6d5bb;font-weight:800}
+   #fixedFirstBenchPopup .b-title{font-size:29px;line-height:1.15;font-weight:850;letter-spacing:-.7px;margin:7px 0 5px;color:#fff}
+   #fixedFirstBenchPopup .b-subtitle{color:#c0d2c3;font-size:13px}
+   #fixedFirstBenchPopup .b-terrain-card{margin:0 16px 19px;padding:18px;border-radius:22px;background:linear-gradient(120deg,#243d2b,#17271d);border:1px solid #496b50;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 10px 26px #0003,inset 0 1px #ffffff12;animation:bCardIn .5s .08s both}
+   #fixedFirstBenchPopup .b-terrain-dots{display:flex;gap:6px;margin-top:9px}
+   #fixedFirstBenchPopup .b-terrain-dots i{display:block;width:22px;height:6px;border-radius:8px;background:#3d5142}
+   #fixedFirstBenchPopup .b-terrain-dots i.on{background:#8bd39a;box-shadow:0 0 10px #8bd39a66}
+   #fixedFirstBenchPopup .b-section-label{padding:7px 20px 9px;color:#9bb6a0;font-size:10px;letter-spacing:2px;font-weight:800;text-transform:uppercase}
+   #fixedFirstBenchPopup .b-info-row{margin:0 16px 11px;border:1px solid #385640;border-radius:20px;background:linear-gradient(112deg,rgba(35,57,41,.96),rgba(22,35,27,.98));overflow:hidden;box-shadow:0 8px 22px #0002;transition:border-color .2s,transform .2s;animation:bCardIn .45s both}
+   #fixedFirstBenchPopup .b-info-row:nth-of-type(1){animation-delay:.10s}#fixedFirstBenchPopup .b-info-row:nth-of-type(2){animation-delay:.16s}#fixedFirstBenchPopup .b-info-row:nth-of-type(3){animation-delay:.22s}
+   #fixedFirstBenchPopup .b-info-row.open{border-color:#79ad80;box-shadow:0 10px 28px #0004,0 0 0 1px #79ad8022}
+   #fixedFirstBenchPopup .b-info-button{width:100%;display:flex;align-items:center;gap:14px;padding:16px;border:0;background:transparent;color:#f2f7f2;text-align:left;font:inherit;min-height:76px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+   #fixedFirstBenchPopup .b-info-symbol{width:44px;height:44px;border-radius:15px;background:linear-gradient(145deg,#355b3d,#213b29);border:1px solid #52785a;display:grid;place-items:center;font-size:21px;flex:none;box-shadow:inset 0 1px #ffffff22,0 4px 12px #0002}
+   #fixedFirstBenchPopup .b-info-main{flex:1;min-width:0}.b-info-name{font-size:15px;font-weight:750}.b-info-summary{display:none;font-size:12px;color:#b2c2b5;margin-top:5px;line-height:1.4}#fixedFirstBenchPopup .b-info-row.open .b-info-summary{display:block}
+   #fixedFirstBenchPopup .b-chevron{font-size:22px;color:#a5c4aa;transition:transform .2s}#fixedFirstBenchPopup .b-info-row.open .b-chevron{transform:rotate(90deg)}
+   #fixedFirstBenchPopup .b-info-content{display:none;padding:0 17px 17px 70px;color:#d4e0d5;font-size:13px;line-height:1.9}#fixedFirstBenchPopup .b-info-row.open .b-info-content{display:block}
+   #fixedFirstBenchPopup .b-tag{display:inline-flex;align-items:center;gap:7px;margin:5px 5px 0 0;padding:8px 12px;border-radius:30px;border:1px solid #52785a;background:linear-gradient(135deg,#2d4933,#203729);color:#e8f5e9;font-size:12px;font-weight:650;box-shadow:inset 0 1px #ffffff12}
+   #fixedFirstBenchPopup .b-bottom-note{margin:20px 16px 0;padding:19px;border-radius:20px;background:linear-gradient(135deg,#1c3022,#142119);border:1px solid #385640;color:#a9c0ad;font-size:11px;text-align:center;box-shadow:inset 0 1px #ffffff12}
+   #fixedFirstBenchPopup .b-detail-back:active,#fixedFirstBenchPopup .b-info-button:active{transform:scale(.985)}
+   #fixedFirstBenchPopup .b-terrain-dots i{width:25px;height:7px;border-radius:9px}
+  </style>
+  <header class="b-detail-top"><div style="display:flex;align-items:center;gap:12px"><button type="button" data-back class="b-detail-back" aria-label="Zurück">‹</button><div class="b-detail-icon">🌲</div><div style="flex:1"><div style="font-size:16px;font-weight:800;letter-spacing:.2px">Bänkle entdecken</div><div style="font-size:11px;color:#9fbaa5">DETAILANSICHT · B00004</div></div><span style="padding:6px 10px;border:1px solid #42664b;border-radius:30px;background:#203729;color:#bde2c2;font-size:10px;font-weight:800;letter-spacing:1px">BÄNKLE</span></div></header>
+  <section class="b-detail-hero"><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><div class="b-eyebrow">Dein nächster Lieblingsplatz</div><div class="b-title">B00004</div><div class="b-subtitle">Schöne Bank umrandet mit Blumen</div></div><button type="button" data-favorite aria-label="Zu Favoriten hinzufügen" title="Zu Favoriten hinzufügen" style="width:43px;height:43px;border:1px solid #8bc995;border-radius:14px;background:#ffffff18;color:#fff;font-size:23px;cursor:pointer">☆</button></div><div style="display:flex;gap:7px;margin-top:17px;flex-wrap:wrap"><span class="b-tag">🌳 Naturplatz</span><span class="b-tag">📍 Bänkle</span></div><button type="button" data-visit style="width:100%;margin-top:18px;min-height:48px;border:1px solid #9bd7a4;border-radius:15px;background:linear-gradient(120deg,#75c987,#3c9b5c);color:#102719;font-weight:850;font-size:15px;box-shadow:0 7px 18px #0003;cursor:pointer">✓ Bänkle besucht</button><div data-visit-status style="font-size:11px;color:#ccebd0;margin-top:8px;text-align:center"></div></section>
+  <button type="button" data-navigate style="display:flex;align-items:center;justify-content:center;gap:10px;width:calc(100% - 32px);margin:0 16px 18px;min-height:52px;border:1px solid #75b984;border-radius:17px;background:linear-gradient(110deg,#284f34,#1c3826);color:#f3fff4;font-size:15px;font-weight:800;box-shadow:0 8px 20px #0003;cursor:pointer">🧭 Navigation starten</button>
+  <section class="b-terrain-card"><div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">🥾</span><div style="font-size:10px;letter-spacing:1.8px;color:#a9c3ad;font-weight:800">GELÄNDE</div></div><div class="b-terrain-dots"><i class="on"></i><i></i><i></i><i></i><i></i></div></div><strong style="font-size:25px;color:#a5e0ad;white-space:nowrap">1<span style="font-size:14px;color:#8ca894">/5</span></strong></section>
+  <div class="b-section-label">Über diesen Ort</div>
+  <section class="b-info-row"><button class="b-info-button" type="button" data-expand><span class="b-info-symbol" aria-hidden="true">📝</span><span class="b-info-main"><span class="b-info-name">Listing</span><span class="b-info-summary">Schöne Bank umrandet mit Blumen</span></span><span class="b-chevron">›</span></button><div class="b-info-content">Schöne Bank umrandet mit Blumen.</div></section>
+  <section class="b-info-row"><button class="b-info-button" type="button" data-expand><span class="b-info-symbol" aria-hidden="true">🏷️</span><span class="b-info-main"><span class="b-info-name">Attribute</span><span class="b-info-summary">3 Eigenschaften hinterlegt</span></span><span class="b-chevron">›</span></button><div class="b-info-content"><span class="b-tag">♿ Für jeden erreichbar</span><span class="b-tag">🌄 Schöne Aussicht in der Nähe</span><span class="b-tag">🛣️ An einer Straße</span></div></section>
+  <section class="b-info-row"><button class="b-info-button" type="button" data-expand><span class="b-info-symbol" aria-hidden="true">📸</span><span class="b-info-main"><span class="b-info-name">Fotos</span><span class="b-info-summary">Keine Fotos (X)</span></span><span class="b-chevron">›</span></button><div class="b-info-content">Keine Fotos hinterlegt (X).</div></section>
+  <div class="b-bottom-note">🌱 <strong style="color:#d9e9dc">Bänkle.App</strong><br>Rausgehen. Entdecken. Wohlfühlen.</div>
+  <div style="height:calc(24px + env(safe-area-inset-bottom))"></div>`;
+  popup.querySelector('[data-back]').addEventListener('click',showSmall);
+  popup.querySelectorAll('[data-expand]').forEach(btn=>btn.addEventListener('click',()=>{const row=btn.closest('.b-info-row');row.classList.toggle('open')}));
+  const visited=readIds(visitKey).includes('B00004');
+  const visitBtn=popup.querySelector('[data-visit]');
+  const visitStatus=popup.querySelector('[data-visit-status]');
+  if(visited){visitBtn.disabled=true;visitBtn.textContent='✓ Bereits besucht';visitBtn.style.opacity='.72';visitStatus.textContent='Dieser Besuch wurde bereits gezählt.';}
+  visitBtn.addEventListener('click',()=>{
+   const ids=readIds(visitKey);if(ids.includes('B00004'))return;
+   askBenchRating('B00004',()=>{
+    const latestIds=readIds(visitKey);if(latestIds.includes('B00004'))return;
+    if(!writeIds(visitKey,[...latestIds,'B00004'])){showAppToast('Besuch konnte nicht gespeichert werden.');return;}
+    const count=Math.max(0,parseInt(localStorage.getItem('baenkle.visitedBenchCount')||'0',10)||0)+1;
+    try{localStorage.setItem('baenkle.visitedBenchCount',String(count));}catch(e){showAppToast('Besuch konnte nicht gespeichert werden.');return;}
+    visitBtn.disabled=true;visitBtn.textContent='✓ Bereits besucht';visitBtn.style.opacity='.72';visitStatus.textContent='Bewertung gesendet – Besuch gespeichert.';updateVisitCount();showAppToast('🌿 B00004 bewertet und als besucht gespeichert!');
+   });
+  });
+  const favBtn=popup.querySelector('[data-favorite]');
+  function syncFavorite(){const active=readIds(favoriteKey).includes('B00004');favBtn.textContent=active?'★':'☆';favBtn.style.background=active?'#d9b94b33':'#ffffff18';favBtn.setAttribute('aria-label',active?'Aus Favoriten entfernen':'Zu Favoriten hinzufügen');}
+  syncFavorite();
+  favBtn.addEventListener('click',()=>{const ids=readIds(favoriteKey);const active=ids.includes('B00004');const next=active?ids.filter(id=>id!=='B00004'):[...ids,'B00004'];if(!writeIds(favoriteKey,next)){showAppToast('Favorit konnte nicht gespeichert werden.');return;}syncFavorite();showAppToast(active?'B00004 aus Favoriten entfernt.':'⭐ B00004 zu deinen Favoriten hinzugefügt!');});
+  popup.querySelector('[data-navigate]').addEventListener('click',()=>{const url='https://www.google.com/maps/dir/?api=1&destination=48.2910667%2C7.8251333&travelmode=walking';window.open(url,'_blank','noopener');});
  }
  showSmall();
  document.body.appendChild(popup);
@@ -1161,15 +1301,65 @@ function addThirdBenchMarker(){
  updateBenchSize();
  map.on('zoom',updateBenchSize);
 }
+function addFourthBenchMarker(){
+ if(fourthBenchMarker || !map || !maplibregl || !map.isStyleLoaded()) return;
+ const outer=document.createElement('div');
+ outer.style.cssText='width:26px;height:26px;display:flex;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;';
+ const button=document.createElement('button');
+ button.type='button';
+ button.setAttribute('aria-label','B00004 öffnen');
+ button.title='B00004';
+ button.style.cssText='display:block;width:26px;height:26px;min-width:0;padding:0;border:0;border-radius:50%;overflow:hidden;background:#176c32;box-shadow:0 2px 8px #0006;cursor:pointer;pointer-events:auto;touch-action:manipulation;';
+ const img=document.createElement('img');
+ img.src=firstBenchImage;img.alt='Bänkle';img.draggable=false;
+ img.style.cssText='display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;';
+ button.appendChild(img);outer.appendChild(button);
+ function updateBenchSize(){
+  const zoom=map.getZoom();
+  const visible=zoom>10;
+  outer.style.display=visible?'flex':'none';
+  outer.style.pointerEvents=visible?'auto':'none';
+  if(!visible)return;
+  const px=Math.max(1,26*firstBenchScale(zoom)).toFixed(1)+'px';
+  outer.style.width=px;outer.style.height=px;
+  button.style.width=px;button.style.height=px;
+ }
+ let pressed=false;
+ button.addEventListener('pointerdown',()=>{
+  pressed=true;button.style.transform='scale(1.2)';
+  button.style.boxShadow='0 3px 13px #0008';
+ });
+ function release(){
+  if(!pressed)return;
+  pressed=false;button.style.transform='scale(1)';
+  button.style.boxShadow='0 2px 8px #0006';
+ }
+ button.addEventListener('pointerup',release);
+ button.addEventListener('pointercancel',release);
+ button.addEventListener('pointerleave',release);
+ button.addEventListener('click',function(ev){
+  ev.preventDefault();ev.stopPropagation();
+  openFourthBenchDetails();
+ });
+ // Verhindert, dass ein Antippen gleichzeitig die Karte verschiebt.
+ outer.addEventListener('touchstart',ev=>ev.stopPropagation(),{passive:true});
+ outer.addEventListener('touchend',ev=>ev.stopPropagation(),{passive:true});
+ outer.addEventListener('mousedown',ev=>ev.stopPropagation());
+ fourthBenchMarker=new maplibregl.Marker({element:outer,anchor:'center',draggable:false})
+  .setLngLat(fourthBenchCoords).addTo(map);
+ updateBenchSize();
+ map.on('zoom',updateBenchSize);
+}
 function ensureFirstBenchMarker(){
  try{
   if(localStorage.getItem('baenkle.admin.benchesRemoved')==='true' || !map || !maplibregl || !map.isStyleLoaded())return;
   if(!firstBenchMarker)addFirstBenchMarker();
   if(!secondBenchMarker)addSecondBenchMarker();
   if(!thirdBenchMarker)addThirdBenchMarker();
+  if(!fourthBenchMarker)addFourthBenchMarker();
  }catch(err){console.warn('Bänkle-Markierung konnte noch nicht gesetzt werden:',err);}
 }
-window.removeAllBaenkleMarkers=function(){try{localStorage.setItem('baenkle.admin.benchesRemoved','true')}catch(e){}if(firstBenchMarker){firstBenchMarker.remove();firstBenchMarker=null;}if(secondBenchMarker){secondBenchMarker.remove();secondBenchMarker=null;}if(thirdBenchMarker){thirdBenchMarker.remove();thirdBenchMarker=null;}const detail=document.getElementById('fixedFirstBenchPopup');if(detail)detail.remove();};
+window.removeAllBaenkleMarkers=function(){try{localStorage.setItem('baenkle.admin.benchesRemoved','true')}catch(e){}if(firstBenchMarker){firstBenchMarker.remove();firstBenchMarker=null;}if(secondBenchMarker){secondBenchMarker.remove();secondBenchMarker=null;}if(thirdBenchMarker){thirdBenchMarker.remove();thirdBenchMarker=null;}if(fourthBenchMarker){fourthBenchMarker.remove();fourthBenchMarker=null;}const detail=document.getElementById('fixedFirstBenchPopup');if(detail)detail.remove();};
 window.restoreBaenkleMarkers=function(){try{localStorage.removeItem('baenkle.admin.benchesRemoved')}catch(e){}ensureFirstBenchMarker();};
 map.on('load',ensureFirstBenchMarker);
 map.on('style.load',ensureFirstBenchMarker);
@@ -1296,14 +1486,14 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
  if(b.dataset.page==='discover')showNavMessage('🧭 Entdecken','Entdecke schöne Plätze, Aussichtspunkte und Wege. Weitere Entdecken-Funktionen können später ergänzt werden.');
  if(b.dataset.page==='favorites'){
   const ids=(()=>{try{const v=JSON.parse(localStorage.getItem('baenkle.favoriteBenchIds')||'[]');return Array.isArray(v)?v:[]}catch(e){return []}})();
-  const saved=[...new Set(ids)].filter(id=>id==='B00001'||id==='B00002'||id==='B00003');
+  const saved=[...new Set(ids)].filter(id=>id==='B00001'||id==='B00002'||id==='B00003'||id==='B00004');
   showNavMessage('⭐ Favoriten',saved.length?'Deine gespeicherten Lieblingsplätze':'Noch keine Favoriten gespeichert. Öffne ein Bänkle und tippe auf ☆.');
   const panel=document.getElementById('navInfoPanel');
   saved.forEach(id=>{
    const card=document.createElement('button');card.type='button';
    card.textContent='🌲  '+id+' · Dein nächster Lieblingsplatz  ›';
    card.style.cssText='display:block;width:100%;margin:14px 0;padding:18px;border:1px solid #477b59;border-radius:16px;background:linear-gradient(120deg,#e4f4e6,#f8fff7);color:#1d4829;text-align:left;font-size:16px;font-weight:800;';
-   card.addEventListener('click',()=>{document.querySelector('nav button[data-page="map"]').click();if(id==='B00001')openFirstBenchDetails();else if(id==='B00002')openSecondBenchDetails();else openThirdBenchDetails();});
+   card.addEventListener('click',()=>{document.querySelector('nav button[data-page="map"]').click();if(id==='B00001')openFirstBenchDetails();else if(id==='B00002')openSecondBenchDetails();else if(id==='B00003')openThirdBenchDetails();else if(id==='B00004')openFourthBenchDetails();});
    panel.append(card);
   });
  }
